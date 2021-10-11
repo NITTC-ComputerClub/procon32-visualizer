@@ -1,0 +1,10 @@
+.right .field {
+  margin-bottom: 20px!important;
+}
+.right .ui.label {
+  width: 70px;
+  text-align: left;
+}
+.right .ui.input {
+  width: 255px!important;
+}
