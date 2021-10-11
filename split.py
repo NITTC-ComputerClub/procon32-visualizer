@@ -13,7 +13,8 @@ def split_img(filename, h, w):
   for i in range(h):
     for j in range(w):
       img = orig.crop((piece_size*j, piece_size*i,  piece_size*(j+1), piece_size*(i+1)))
-      img = img.resize((50, 50))
+      #img = img.resize((50, 50))
+      img = img.resize((800//w, 800//h))
       img.save("images/%d_%d.png" %(i, j))
 
 def main():
