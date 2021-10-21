@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
-    <style src="./index.css" type="text/css"></style>
+    <link rel="stylesheet" href="./index.css">
 </head>
 
 <body>
@@ -65,20 +65,12 @@
                     </div>
                 </div>
             </div>
-            
-            <div style="display: flex; flex-direction: row">
-                <div style="margin-right: 30px">
-                    <div>
-                        <div id = "canvas" style="border: black solid 1px; margin-left: 1px;" height="800" width="800"></div>
-                        <!-- <canvas id="canvas" style="border: black solid 1px; margin-left: 1px;" height="800" width="800"></canvas> -->
-                    </div>
-                    
-                    <div class="ui form">
-                        <div class="inline fields">
-                            <div class="field">
-                                <span id="saveAsImage" class="ui button"><i class="download icon"></i>save as image</span>
-                            </div>
-                        </div>
+            <div id="canvas" class="canvas"></div>
+            <!-- <canvas id="canvas" style="border: black solid 1px; margin-left: 1px;" height="800" width="800"></canvas> -->  
+            <div class="ui form">
+                <div class="inline fields">
+                    <div class="field">
+                        <span id="saveAsImage" class="ui button"><i class="download icon"></i>save as image</span>
                     </div>
                 </div>
             </div>

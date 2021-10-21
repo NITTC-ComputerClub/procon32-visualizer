@@ -32,19 +32,17 @@ var info = function(board, y, x){
 (function(){
   //画像の描画
   for(let i = 0; i < height; i++){
-    let row = document.createElement("div");
     let temp = [];
     for(let j = 0; j < width; j++){
       img = new Image();
-      img.src = "./images/" + i + "_" + j + ".png"
-      img.id = i + "_" + j
+      img.src = "./images/" + i + "_" + j + ".png";
+      img.id = i + "_" + j;
       img.className = "image";
-      row.appendChild(img);
+      img.style.top = i*66 + "px";
+      img.style.left = j*66 + "px";
+      canvas.appendChild(img);
       temp.push([i,j]);
     }
-    row.className = "row";
-    row.style.height = "66px";
-    canvas.appendChild(row);
     board.push(temp);
   }
 
@@ -105,6 +103,30 @@ function swap(sy, sx, ty, tx){
   const temp = [board[sy][sx][0], board[sy][sx][1]];
   board[sy][sx] = board[ty][tx];
   board[ty][tx] = temp;
+}
+//壁を通過する場合は通常の動きで処理する
+async function swap_motion(sy, sx, ty, tx, time){
+  for(let r = 0; r < 4; r++){
+    const ny = sy + dy[r];
+    const nx = sx + dx[r];
+    if(ny == ty && nx == tx){
+      let s = document.getElementById(sy + "_" + sx);
+      let t = document.getElementById(ty + "_" + tx);
+      for(let i = 1; i <= 66; i += 4){
+        s.style.top = sy*66 + i*dy[r] + "px";
+        s.style.left = sx*66 + i*dx[r] + "px";
+        t.style.top = ty*66 + i*dy[(r + 2) % 4] + "px";
+        t.style.left = tx*66 + i*dx[(r + 2) % 4] + "px";
+        await sleep(time);
+      }
+      s.style.top = sy*66 + "px";
+      s.style.left = sx*66 + "px";
+      t.style.top = ty*66 + "px";
+      t.style.left = tx*66 + "px";
+      break;
+    }
+  }
+  return 0;
 }
 function move(str, y, x){
   let n = str.length;

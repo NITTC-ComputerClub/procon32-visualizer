@@ -113,6 +113,7 @@ var framework;
             this.lastButton = document.getElementById("lastButton");
             this.runIcon = document.getElementById("runIcon");
             this.intervalId = null;
+            this.moving = false; //playボタンで再生中かどうか
             //this.setMinMax(-1, -1);
             this.setMinMax(0, 3779); //ここで操作回数を指定する
             this.seekRange.addEventListener('change', function () {
@@ -180,16 +181,17 @@ var framework;
             return parseInt(this.seekRange.value);
         };
         RichSeekBar.prototype.getDelay = function () {
-            var fps = parseInt(this.fpsInput.value);
+            let fps = parseInt(this.fpsInput.value);
             return Math.floor(1000 / fps);
         };
         RichSeekBar.prototype.resetInterval = function () {
-            if (this.intervalId) {
-                clearInterval(this.intervalId);
-                this.intervalId = null;
-            }
+            // if (this.intervalId) {
+            //     clearInterval(this.intervalId);
+            //     this.intervalId = null;
+            // }
+            this.moving = false;
         };
-        RichSeekBar.prototype.play = function () {
+        RichSeekBar.prototype.play = async function () {
             var _this = this;
             this.playButton.removeEventListener('click', this.playClosure);
             this.playButton.addEventListener('click', this.stopClosure);
@@ -199,14 +201,33 @@ var framework;
                 this.setValue(this.getMin());
             }
             this.resetInterval();
-            this.intervalId = setInterval(function () {
+            async function interval_move(){
                 if (_this.getValue() == _this.getMax()) {
                     _this.stop();
                 }
                 else {
+                    let cur = _this.getValue();
+                    let delay = _this.getDelay() / 66;
+                    await swap_motion(frames[cur].y, frames[cur].x, frames[cur+1].y, frames[cur+1].x, delay);
                     _this.setValue(_this.getValue() + 1);
                 }
-            }, this.getDelay());
+            }
+            this.moving = true;
+            while(this.moving){
+                await interval_move();
+            }
+            // this.intervalId = setInterval(async function () {
+            //     if (_this.getValue() == _this.getMax()) {
+            //         _this.stop();
+            //     }
+            //     else {
+            //         let cur = _this.getValue();
+            //         let delay = _this.getDelay() / (66 / 2);
+            //         await swap_motion(frames[cur].y, frames[cur].x, frames[cur+1].y, frames[cur+1].x, delay);
+            //         _this.setValue(_this.getValue() + 1);
+            //     }
+            // //}, this.getDelay());
+            // }, 0);
         };
         RichSeekBar.prototype.stop = function () {
             this.playButton.removeEventListener('click', this.stopClosure);
@@ -362,12 +383,15 @@ var visualizer;
             this.priceInput = document.getElementById("priceInput");
             this.logArea = document.getElementById("logArea");
         }
-        Visualizer.prototype.draw = function (frame) {
+        Visualizer.prototype.draw = async function (frame, pre) {
             console.log(frame);
             //移動情報をファイルから受け取る
             if(frame > n){
                 alert("length error");
                 return;
+            }
+            if(frame - pre == 1){
+                //await swap_motion(frames[pre].y, frames[pre].x, frames[frame].y, frames[frame].x, 10);
             }
             let board = frames[frame].board;
             for(let i = 0; i < height; i++){
@@ -391,7 +415,7 @@ var visualizer;
             this.visualizer = new Visualizer();
             this.exporter = new framework.FileExporter(this.visualizer.getCanvas());
             this.seek = new framework.RichSeekBar(function (curValue, preValue) {
-                _this.visualizer.draw(curValue);
+                _this.visualizer.draw(curValue, preValue);
                 //if (_this.tester) {
                 //    _this.visualizer.draw(_this.tester.frames[curValue]);
                 //}

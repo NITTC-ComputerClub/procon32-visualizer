@@ -8,3 +8,13 @@
 .right .ui.input {
   width: 255px!important;
 }
+
+.canvas {
+  border: black solid 1px;
+  height: 800px;
+  width: 800px;
+  position: relative;
+}
+.image {
+  position: absolute;
+}
