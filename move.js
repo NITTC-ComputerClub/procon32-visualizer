@@ -34,12 +34,14 @@ var info = function(board, y, x){
   for(let i = 0; i < height; i++){
     let temp = [];
     for(let j = 0; j < width; j++){
-      img = new Image();
+      let img = new Image();
       img.src = "./images/" + i + "_" + j + ".png";
       img.id = i + "_" + j;
       img.className = "image";
       img.style.top = i*66 + "px";
       img.style.left = j*66 + "px";
+      img.style.height = "66px";
+      img.style.width = "66px";
       canvas.appendChild(img);
       temp.push([i,j]);
     }
@@ -60,6 +62,8 @@ var info = function(board, y, x){
     }
     frames.push(new info(board, y, x));
   }
+  
+  rotate_imgs_motion(rotate_cmd);
 }());
 
 //左上から原画像の回転を行う
@@ -106,27 +110,27 @@ function swap(sy, sx, ty, tx){
 }
 //壁を通過する場合は通常の動きで処理する
 async function swap_motion(sy, sx, ty, tx, time){
+  const delay = 66 / time * 5;
   for(let r = 0; r < 4; r++){
     const ny = sy + dy[r];
     const nx = sx + dx[r];
     if(ny == ty && nx == tx){
       let s = document.getElementById(sy + "_" + sx);
       let t = document.getElementById(ty + "_" + tx);
-      for(let i = 1; i <= 66; i += 4){
+      for(let i = 1; i <= 66; i += delay){
         s.style.top = sy*66 + i*dy[r] + "px";
         s.style.left = sx*66 + i*dx[r] + "px";
         t.style.top = ty*66 + i*dy[(r + 2) % 4] + "px";
         t.style.left = tx*66 + i*dx[(r + 2) % 4] + "px";
-        await sleep(time);
+        await sleep(1);
       }
       s.style.top = sy*66 + "px";
       s.style.left = sx*66 + "px";
       t.style.top = ty*66 + "px";
       t.style.left = tx*66 + "px";
-      break;
+      return;
     }
   }
-  return 0;
 }
 function move(str, y, x){
   let n = str.length;

@@ -182,7 +182,8 @@ var framework;
         };
         RichSeekBar.prototype.getDelay = function () {
             let fps = parseInt(this.fpsInput.value);
-            return Math.floor(1000 / fps);
+            //return Math.floor(1000 / fps);
+            return 1000 / fps;
         };
         RichSeekBar.prototype.resetInterval = function () {
             // if (this.intervalId) {
@@ -206,12 +207,15 @@ var framework;
                     _this.stop();
                 }
                 else {
-                    let cur = _this.getValue();
-                    let delay = _this.getDelay() / 66;
-                    await swap_motion(frames[cur].y, frames[cur].x, frames[cur+1].y, frames[cur+1].x, delay);
+                    const cur = frames[_this.getValue()];
+                    const next = frames[_this.getValue() + 1];
+                    const delay = _this.getDelay();
+                    //だいたいdelay[ms]使って動かす
+                    await swap_motion(cur.y, cur.x, next.y, next.x, delay);
                     _this.setValue(_this.getValue() + 1);
                 }
             }
+            //再生ボタンがオンになっている限り、操作を続ける
             this.moving = true;
             while(this.moving){
                 await interval_move();
@@ -390,15 +394,18 @@ var visualizer;
                 alert("length error");
                 return;
             }
-            if(frame - pre == 1){
-                //await swap_motion(frames[pre].y, frames[pre].x, frames[frame].y, frames[frame].x, 10);
-            }
             let board = frames[frame].board;
             for(let i = 0; i < height; i++){
                 for(let j = 0; j < width; j++){
-                    document.getElementById(i + "_" + j).src = "./images/" + board[i][j][0] + "_" + board[i][j][1] + ".png";
+                    let img = document.getElementById(i + "_" + j);
+                    img.src = "./images/" + board[i][j][0] + "_" + board[i][j][1] + ".png";
+                    img.style.border = "none";
+                    img.style.zIndex = 0;
                 }
             }
+            let selecting = document.getElementById(frames[frame].y + "_" + frames[frame].x);
+            selecting.style.border = "1px solid red";
+            selecting.style.zIndex = 10;
         };
         Visualizer.prototype.init_draw = function() {
             rotate_imgs_motion(rotate_cmd);

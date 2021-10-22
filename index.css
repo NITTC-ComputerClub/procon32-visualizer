@@ -17,4 +17,5 @@
 }
 .image {
   position: absolute;
+  box-sizing: border-box;
 }
