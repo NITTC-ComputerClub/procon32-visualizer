@@ -19,28 +19,6 @@
     <div class="ui container center aligned">
         <div class="ui form">
             <div class="inline fields">
-                <div class="field">
-                    <div class="ui labeled input">
-                        <div class="ui label">
-                            input file
-                        </div>
-                        <input id="inputFile" type="file"/>
-                    </div>
-                </div>
-                <div class="field">
-                    <div class="ui labeled input">
-                        <div class="ui label">
-                            output file
-                        </div>
-                        <input id="outputFile" type="file"/>
-                    </div>
-                </div>
-                <div class="field">
-                    <button id="reloadButton" class="ui primary button disabled"><i class="sync icon"></i> reload</button>
-                </div>
-            </div>
-            
-            <div class="inline fields">
                 <div class="six wide field">
                     <input id="seekRange" type="range"/>
                 </div>
@@ -58,7 +36,7 @@
                 </div>
                 <div class="field">
                     <div class="ui labeled input">
-                        <input id="fpsInput" type="number" value="20"/>
+                        <input id="fpsInput" type="number" value="10"/>
                         <div class="ui label">
                             fps
                         </div>
@@ -66,14 +44,6 @@
                 </div>
             </div>
             <div id="canvas" class="canvas"></div>
-            <!-- <canvas id="canvas" style="border: black solid 1px; margin-left: 1px;" height="800" width="800"></canvas> -->  
-            <div class="ui form">
-                <div class="inline fields">
-                    <div class="field">
-                        <span id="saveAsImage" class="ui button"><i class="download icon"></i>save as image</span>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </body>
