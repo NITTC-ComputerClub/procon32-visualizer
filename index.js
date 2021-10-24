@@ -387,25 +387,28 @@ var visualizer;
             this.priceInput = document.getElementById("priceInput");
             this.logArea = document.getElementById("logArea");
         }
-        Visualizer.prototype.draw = async function (frame, pre) {
-            console.log(frame);
+        Visualizer.prototype.draw = async function (cur, pre) {
+            console.log(cur);
             //移動情報をファイルから受け取る
-            if(frame > n){
+            if(cur > move_cmd.length){
                 alert("length error");
                 return;
             }
-            let board = frames[frame].board;
+            let board = frames[cur].board;
             for(let i = 0; i < height; i++){
                 for(let j = 0; j < width; j++){
                     let img = document.getElementById(i + "_" + j);
-                    img.src = "./images/" + board[i][j][0] + "_" + board[i][j][1] + ".png";
+                    const posy = board[i][j][0], posx = board[i][j][1]; //i,jにある画像の初期位置
+                    img.src = "./images/" + posy + "_" + posx + ".png";
                     img.style.border = "none";
-                    img.style.zIndex = 0;
+                    const val = rotate_cmd[recover_pos[posy][posx][0]*width + recover_pos[posy][posx][1]];
+                    img.style.transform = "rotate(" + val*90 + "deg)";
+                    img.style.zIndex = 0; //背面に持ってくる
                 }
             }
-            let selecting = document.getElementById(frames[frame].y + "_" + frames[frame].x);
+            let selecting = document.getElementById(frames[cur].y + "_" + frames[cur].x);
             selecting.style.border = "1px solid red";
-            selecting.style.zIndex = 10;
+            selecting.style.zIndex = 10; //前面に持ってくる
         };
         Visualizer.prototype.init_draw = function() {
             rotate_imgs_motion(rotate_cmd);
