@@ -15,7 +15,8 @@ var framework;
             this.runIcon = document.getElementById("runIcon");
             this.moving = false; //playボタンで再生中かどうか
             //this.setMinMax(-1, -1);
-            this.setMinMax(0, 3779); //ここで操作回数を指定する
+            //this.setMinMax(0, 3779); //ここで操作回数を指定する
+            this.setMinMax(0, frames.length - 1);
             this.seekRange.addEventListener('change', function () {
                 _this.setValue(parseInt(_this.seekRange.value));
             });
@@ -136,7 +137,7 @@ var visualizer;
         }
         Visualizer.prototype.draw = async function (cur) {
             console.log(cur);
-            if(cur > move_cmd.length){
+            if(cur >= frames.length){
                 alert("length error");
                 return;
             }
@@ -145,7 +146,8 @@ var visualizer;
                 for(let j = 0; j < width; j++){
                     let img = document.getElementById(i + "_" + j);
                     const posy = board[i][j][0], posx = board[i][j][1]; //i,jにある画像の初期位置
-                    img.src = "./images/" + posy + "_" + posx + ".png";
+                    //img.src = "./images/" + posy + "_" + posx + ".png";
+                    img.src = "./imagesdata/"+image_val+"/" + posy + "_" + posx + ".png";
                     img.style.border = "none";
                     const val = rotate_cmd[recover_pos[posy][posx][0]*width + recover_pos[posy][posx][1]];
                     img.style.transform = "rotate(" + val*90 + "deg)";
