@@ -12,11 +12,10 @@ var framework;
             this.playButton = document.getElementById("playButton");
             this.nextButton = document.getElementById("nextButton");
             this.lastButton = document.getElementById("lastButton");
+            this.reloadButton = document.getElementById("reloadButton");
             this.runIcon = document.getElementById("runIcon");
             this.moving = false; //playボタンで再生中かどうか
-            //this.setMinMax(-1, -1);
-            //this.setMinMax(0, 3779); //ここで操作回数を指定する
-            this.setMinMax(0, frames.length - 1);
+            this.setMinMax(0, frames.length - 1); //操作回数を指定
             this.seekRange.addEventListener('change', function () {
                 _this.setValue(parseInt(_this.seekRange.value));
             });
@@ -49,6 +48,9 @@ var framework;
             this.lastButton.addEventListener('click', function () {
                 _this.stop();
                 _this.setValue(_this.getMax());
+            });
+            this.reloadButton.addEventListener('click', function() {
+                location.reload();
             });
             this.playClosure = function () {
                 _this.play();
