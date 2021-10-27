@@ -1,4 +1,4 @@
-const image_val = 9; //そろえる画像の種類
+const image_val = Math.floor(Math.random() * 37) + 1; //そろえる画像の種類
 
 //そろえる画像の移動データファイルを読み込む
 //move.jsより前に変数が定義される
