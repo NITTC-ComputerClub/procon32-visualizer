@@ -137,26 +137,26 @@ var visualizer;
         function Visualizer() {
             this.canvas = document.getElementById("canvas");
         }
-        Visualizer.prototype.draw = async function (cur) {
+        Visualizer.prototype.draw = function (cur) {
             console.log(cur);
             if(cur >= frames.length){
                 alert("length error");
                 return;
             }
             let board = frames[cur].board;
-            for(let i = 0; i < height; i++){
-                for(let j = 0; j < width; j++){
-                    let img = document.getElementById(i + "_" + j);
-                    const posy = board[i][j][0], posx = board[i][j][1]; //i,jにある画像の初期位置
-                    //img.src = "./images/" + posy + "_" + posx + ".png";
-                    img.src = "./imagesdata/"+image_val+"/" + posy + "_" + posx + ".png";
-                    img.style.border = "none";
-                    const val = rotate_cmd[recover_pos[posy][posx][0]*width + recover_pos[posy][posx][1]];
-                    img.style.transform = "rotate(" + val*90 + "deg)";
-                    img.style.zIndex = 0; //背面に持ってくる
-                }
+            for(let i = 0; i < pieces; i++){
+                const y = Math.floor(i/width);
+                const x = i % width;
+                let img = document.getElementById(y + "_" + x);
+                const posy = Math.floor(board[i] / width);
+                const posx = board[i] % width;
+                img.src = "./imagesdata/"+image_val+"/" + posy + "_" + posx + ".png";
+                img.style.border = "none";
+                const val = rotate_cmd[recover_pos[board[i]]];
+                img.style.transform = "rotate(" + val*90 + "deg)";
+                img.style.zIndex = 0; //背面に持ってくる
             }
-            let selecting = document.getElementById(frames[cur].y + "_" + frames[cur].x);
+            let selecting = document.getElementById(Math.floor(frames[cur].pos/width) + "_" + frames[cur].pos%width);
             selecting.style.border = "1px solid red";
             selecting.style.zIndex = 10; //前面に持ってくる
         };
