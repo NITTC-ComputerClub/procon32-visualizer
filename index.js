@@ -110,7 +110,7 @@ var framework;
                     const next = frames[_this.getValue() + 1];
                     const delay = _this.getDelay();
                     //だいたいdelay[ms]使って動かす
-                    await swap_motion(cur.y, cur.x, next.y, next.x, delay);
+                    await swap_motion(cur.pos, next.pos, delay);
                     _this.setValue(_this.getValue() + 1);
                 }
             }
@@ -143,20 +143,16 @@ var visualizer;
                 alert("length error");
                 return;
             }
-            let board = frames[cur].board;
+            const board = frames[cur].board;
             for(let i = 0; i < pieces; i++){
-                const y = Math.floor(i/width);
-                const x = i % width;
-                let img = document.getElementById(y + "_" + x);
-                const posy = Math.floor(board[i] / width);
-                const posx = board[i] % width;
-                img.src = "./imagesdata/"+image_val+"/" + posy + "_" + posx + ".png";
+                let img = document.getElementById(i);
+                img.src = "./imagesdata/"+image_val+"/" + board[i] + ".png";
                 img.style.border = "none";
                 const val = rotate_cmd[recover_pos[board[i]]];
                 img.style.transform = "rotate(" + val*90 + "deg)";
                 img.style.zIndex = 0; //背面に持ってくる
             }
-            let selecting = document.getElementById(Math.floor(frames[cur].pos/width) + "_" + frames[cur].pos%width);
+            let selecting = document.getElementById(frames[cur].pos);
             selecting.style.border = "1px solid red";
             selecting.style.zIndex = 10; //前面に持ってくる
         };

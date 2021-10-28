@@ -5,7 +5,7 @@ const size = 800 / height;
 let canvas = document.getElementById("canvas");
 const direc = ['U', 'L', 'D', 'R'];
 const dy = [-1,0,1,0], dx = [0,-1,0,1];
-const d = [-width, -1, width, 0]; //1次元配列でのdy,dx
+const d = [-width, -1, width, 1]; //1次元でのdy,dx
 const sleep = waitTime => new Promise( resolve => setTimeout(resolve, waitTime) );
 
 var frames = []; //info
@@ -56,8 +56,9 @@ function init_panels(){
     for(let j = 0; j < width; j++){
       let img = new Image();
       //img.src = "./images/" + i + "_" + j + ".png";
-      img.src = "./imagesdata/"+image_val+"/" + i + "_" + j + ".png";
-      img.id = i + "_" + j;
+      const pos = i * width + j;
+      img.src = "./imagesdata/"+image_val+"/" + pos + ".png";
+      img.id = pos;
       img.className = "image";
       img.style.top = i*size + "px";
       img.style.left = j*size + "px";
@@ -77,6 +78,7 @@ function calc_recover_pos(){
   return mat;
 }
 
+//movedata.jsの実行時に実行される
 function start(){
   frames = make_frames();
   init_panels();
@@ -117,18 +119,18 @@ async function rotate_imgs_motion(str){
 }
 */
 
-//実際に移動させるときの処理 Visualizer.draw()にある
+
 //壁を通過する場合は通常の動きで処理する
-async function swap_motion(s, t, time){
+async function swap_motion(cur, next, time){
   const delay = size / time * 5;
-  const sy = Math.floor(s / width);
-  const sx = s % width;
-  const ty = Math.floor(t / width);
-  const tx = t % width;
+  const sy = Math.floor(cur / width);
+  const sx = cur % width;
+  const ty = Math.floor(next / width);
+  const tx = next % width;
   for(let r = 0; r < 4; r++){
-    if(s + d[r] == t){
-      let s = document.getElementById(sy + "_" + sx);
-      let t = document.getElementById(ty + "_" + tx);
+    if(cur + d[r] == next){
+      let s = document.getElementById(cur);
+      let t = document.getElementById(next);
       for(let i = 1; i <= size; i += delay){
         s.style.top = sy*size + i*dy[r] + "px";
         s.style.left = sx*size + i*dx[r] + "px";
