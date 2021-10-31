@@ -10,7 +10,6 @@
 }
 
 .canvas {
-  border: black solid 1px;
   height: 800px;
   width: 800px;
   position: relative;
@@ -18,4 +17,6 @@
 .image {
   position: absolute;
   box-sizing: border-box;
+  object-fit: none;
+  object-position: 0%;
 }

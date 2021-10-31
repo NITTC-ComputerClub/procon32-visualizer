@@ -110,7 +110,7 @@ var framework;
                     const next = frames[_this.getValue() + 1];
                     const delay = _this.getDelay();
                     //だいたいdelay[ms]使って動かす
-                    await swap_motion(cur.pos, next.pos, delay);
+                    await swap_motion(cur.pos, next.pos, delay, cur.board);
                     _this.setValue(_this.getValue() + 1);
                 }
             }
