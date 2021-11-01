@@ -23,9 +23,7 @@ var Info = function(board, pos){
 function make_frames(){
   //move_cmdはimagedata/image_val/movedata.jsにある
   let board = new Array(pieces);
-  for(let i = 0; i < pieces; i++){
-    board[i] = i;
-  }
+  for(let i = 0; i < pieces; i++) board[i] = i;
   function swap(s, t){
     const temp = board[s];
     board[s] = board[t];
@@ -35,10 +33,11 @@ function make_frames(){
   for(let cur = 0; cur < move_cmd.length; cur++){
     let y = move_cmd[cur][1];
     let x = move_cmd[cur][0];
+    const cmd = move_cmd[cur][2];
     frames.push(new Info(board, y*width+x));
-    for(let i = 0; i < move_cmd[cur][2].length; i++){
+    for(let i = 0; i < cmd.length; i++){
       for(let j = 0; j < 4; j++){
-        if(direc[j] == move_cmd[cur][2][i]){
+        if(direc[j] == cmd[i]){
           const ny = (y + dy[j] + height) % height;
           const nx = (x + dx[j] + width) % width;
           swap(y*width+x, ny*width+nx);
@@ -108,19 +107,28 @@ async function rotate_imgs_motion(str){
 }
 */
 
+HTMLElement.prototype.move = function(dy, dx){
+  const posy = parseFloat(this.style.top);
+  const posx = parseFloat(this.style.left);
+  this.style.top = posy + dy + "px";
+  this.style.left = posx + dx + "px";
+};
+HTMLElement.prototype.resize = function(h=size, w=size){
+  this.style.height = h + "px";
+  this.style.width = w + "px";
+};
+
 //画像の要素を生成
 function create_image_element(id, img_num){
   const y = Math.floor(id / width);
   const x = id % width;
   let img = new Image();
-  //img.src = "./images/" + i + "_" + j + ".png";
   img.src = "./imagesdata/"+image_val+"/" + img_num + ".png";
   img.id = id;
   img.className = "image";
   img.style.top = y*size + "px";
   img.style.left = x*size + "px";
-  img.style.height = size + "px";
-  img.style.width = size + "px";
+  img.resize();
   img.style.zIndex = 0;
   return img;
 }
@@ -129,10 +137,9 @@ function init_img_elem(id){
   const y = Math.floor(id / width);
   const x = id % width;
   const img = document.getElementById(id);
-  img.style.height = size + "px";
-  img.style.width = size + "px";
   img.style.top = y*size + "px";
   img.style.left = x*size + "px";
+  img.resize();
   img.style.zIndex = 0;
 }
 
@@ -147,10 +154,8 @@ async function swap_motion(cur, next, time, board){
   for(let r = 0; r < 4; r++){
     if(cur + d[r] == next){
       for(let i = 1; i <= size; i += delay){
-        s.style.top = sy*size + i*dy[r] + "px";
-        s.style.left = sx*size + i*dx[r] + "px";
-        t.style.top = ty*size + i*dy[(r + 2) % 4] + "px";
-        t.style.left = tx*size + i*dx[(r + 2) % 4] + "px";
+        s.move(delay * dy[r], delay * dx[r]);
+        t.move(delay * dy[(r+2)%4], delay * dx[(r+2)%4]);
         await sleep(1);
       }
       init_img_elem(cur);
@@ -163,11 +168,9 @@ async function swap_motion(cur, next, time, board){
     const ny = (sy + dy[r] + height) % height;
     const nx = (sx + dx[r] + width) % width;
     if(ny != ty || nx != tx) continue;
-    //分割してそれぞれ表示する
 
     //座標nextに画像board[cur]を追加する
     let s_temp = create_image_element(next, board[cur]);
-    //座標curに画像board[next]を追加する
     let t_temp = create_image_element(cur, board[next]);
     canvas.appendChild(s_temp);
     canvas.appendChild(t_temp);
@@ -177,43 +180,29 @@ async function swap_motion(cur, next, time, board){
     s.style.objectPosition = val[r];
     t.style.objectPosition = val[(r + 2) % 4];
     s_temp.style.objectPosition = val[(r + 2) % 4];
-    s_temp.style.border = "1px solid red"; //選択中
     t_temp.style.objectPosition = val[r];
-    for(let i = 1; i <= size; i += delay){
+    s_temp.style.border = "1px solid red"; //選択中
+
+    //場合に応じてtempをsize移動する
+    if(r <= 1) s_temp.move((~r&1)*size, (r&1)*size);
+    else t_temp.move((~r&1)*size, (r&1)*size);
+
+    for(let i = 0; i <= size; i += delay){
       //もともとある画像の移動
-      if(r & 1){
-        s.style.width = size-i + "px";
-        t.style.width = size-i + "px";
-      }else{
-        s.style.height = size-i + "px";
-        t.style.height = size-i + "px";
-      }
-      if(r == 0){
-        t.style.top = ty*size + i*dy[(r+2)%4] + "px"; 
-      }else if(r == 1){
-        t.style.left = tx*size + i*dx[(r+2)%4] + "px";
-      }else if(r == 2){
-        s.style.top = sy*size + i*dy[r] + "px";
-      }else{
-        s.style.left = sx*size + i*dx[r] + "px";
-      }
-      //反対側に生成された画像の移動
-      if(r & 1){
-        s_temp.style.width = i + "px";
-        t_temp.style.width = i + "px";
-      }else{
-        s_temp.style.height = i + "px";
-        t_temp.style.height = i + "px";
-      }
-      if(r == 0){
-        s_temp.style.top = ty*size + dy[(r+2)%4]*size + i*dy[r] + "px";
-      }else if(r == 1){
-        s_temp.style.left = tx*size + dx[(r+2)%4]*size + i*dx[r] + "px";
-      }else if(r == 2){
-        t_temp.style.top = sy*size + dy[r]*size + i*dy[(r+2)%4] + "px";
-      }else{
-        t_temp.style.left = sx*size + dx[r]*size + i*dx[(r+2)%4] + "px";
-      }
+      s.resize(size-[i,0][r & 1], size-[0,i][r & 1]);
+      t.resize(size-[i,0][r & 1], size-[0,i][r & 1]);
+
+      if(r <= 1) t.move((~r&1)*delay, (r&1)*delay);
+      else s.move((~r&1)*delay, (r&1)*delay);
+
+
+      //反対側に生成されたtemp画像の移動
+      s_temp.resize([i,size][r & 1], [size,i][r & 1]);
+      t_temp.resize([i,size][r & 1], [size,i][r & 1]);
+
+      if(r <= 1) s_temp.move((~r&1)*-delay, (r&1)*-delay);
+      else t_temp.move((~r&1)*-delay, (r&1)*-delay);
+
       await sleep(1);
     }
     init_img_elem(cur);
