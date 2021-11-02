@@ -14,7 +14,7 @@ var framework;
             this.lastButton = document.getElementById("lastButton");
             this.reloadButton = document.getElementById("reloadButton");
             this.runIcon = document.getElementById("runIcon");
-            this.moving = false; //playボタンで再生中かどうか
+            is_moving = false; //mvoe.js playボタンで再生中かどうか
             this.setMinMax(0, frames.length - 1); //操作回数を指定
             this.seekRange.addEventListener('change', function () {
                 _this.setValue(parseInt(_this.seekRange.value));
@@ -43,7 +43,7 @@ var framework;
             });
             this.nextButton.addEventListener('click', function () {
                 _this.stop();
-                _this.setValue(_this.getValue() + 1);
+                if(!is_moving) _this.setValue(_this.getValue() + 1);
             });
             this.lastButton.addEventListener('click', function () {
                 _this.stop();
@@ -88,9 +88,6 @@ var framework;
             if(fps >= 100) return 1;
             return 1000 / fps;
         };
-        RichSeekBar.prototype.resetInterval = function () {
-            this.moving = false;
-        };
         RichSeekBar.prototype.play = async function () {
             var _this = this;
             this.playButton.removeEventListener('click', this.playClosure);
@@ -100,7 +97,6 @@ var framework;
             if (this.getValue() == this.getMax()) { // if last, go to first
                 this.setValue(this.getMin());
             }
-            this.resetInterval();
             async function interval_move(){
                 if (_this.getValue() == _this.getMax()) {
                     _this.stop();
@@ -115,17 +111,15 @@ var framework;
                 }
             }
             //再生ボタンがオンになっている限り、操作を続ける
-            this.moving = true;
-            while(this.moving){
-                await interval_move();
-            }
+            is_moving = true;
+            while(is_moving) await interval_move();
         };
         RichSeekBar.prototype.stop = function () {
             this.playButton.removeEventListener('click', this.stopClosure);
             this.playButton.addEventListener('click', this.playClosure);
             this.runIcon.classList.remove('stop');
             this.runIcon.classList.add('play');
-            this.resetInterval();
+            is_moving = false;
         };
         return RichSeekBar;
     }());
@@ -134,9 +128,7 @@ var framework;
 var visualizer;
 (function (visualizer) {
     var Visualizer = /** @class */ (function () {
-        function Visualizer() {
-            this.canvas = document.getElementById("canvas");
-        }
+        function Visualizer() {}
         Visualizer.prototype.draw = function (cur) {
             console.log(cur);
             if(cur >= frames.length){
@@ -144,13 +136,31 @@ var visualizer;
                 return;
             }
             const board = frames[cur].board;
-            for(let i = 0; i < pieces; i++){
-                let img = document.getElementById(i);
-                img.src = "./imagesdata/"+image_val+"/" + board[i] + ".png";
-                img.style.border = "none";
-                const val = rotate_cmd[recover_pos[board[i]]];
-                img.style.transform = "rotate(" + val*90 + "deg)";
-                img.style.zIndex = 0; //背面に持ってくる
+            let pos = 0;
+            for(let i = 0; i < height; i++){
+                for(let j = 0; j < width; j++){
+                    let img = document.getElementById(pos);
+                    img.src = "./imagesdata/"+image_val+"/" + board[pos] + ".png";
+                    img.style.border = "none";
+                    const val = rotate_cmd[recover_pos[board[pos]]];
+                    img.style.transform = "rotate(" + val*90 + "deg)";
+                    img.style.zIndex = 0; //背面に持ってくる
+
+                    if(recover_pos[board[pos]] != pos++) continue;
+                    img.style.border = "2px solid blue";
+                    for(let r = 0; r < 4; r++){
+                        const y = i + dy[r];
+                        const x = j + dx[r];
+                        if(y < 0 || x < 0 || y >= height || x >= width) continue;
+                        const pos = y*width + x;
+                        if(recover_pos[board[pos]] == pos){
+                            if(r == 0) img.style.borderTop = "none";
+                            if(r == 1) img.style.borderLeft = "none";
+                            if(r == 2) img.style.borderBottom = "none";
+                            if(r == 3) img.style.borderRight = "none";
+                        }
+                    }
+                }
             }
             let selecting = document.getElementById(frames[cur].pos);
             selecting.style.border = "1px solid red";

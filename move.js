@@ -10,7 +10,7 @@ const sleep = waitTime => new Promise( resolve => setTimeout(resolve, waitTime) 
 
 var frames = []; //info
 var recover_pos = []; //完成後の位置 初期i,jにいて最後にrecover_pos[i][j]にいる状態
-
+var is_moving = false; //playボタンで再生中かどうか
 
 var Info = function(board, pos){
   //現在の場面(値渡し)
@@ -23,9 +23,7 @@ var Info = function(board, pos){
 function make_frames(){
   //move_cmdはimagedata/image_val/movedata.jsにある
   let board = new Array(pieces);
-  for(let i = 0; i < pieces; i++){
-    board[i] = i;
-  }
+  for(let i = 0; i < pieces; i++) board[i] = i;
   function swap(s, t){
     const temp = board[s];
     board[s] = board[t];
@@ -58,12 +56,9 @@ function init_panels(){
   }
 }
 function calc_recover_pos(){
-  const last = move_cmd.length;
+  const last_board = frames[frames.length - 1].board;
   let mat = new Array(pieces);
-  for(let i = 0; i < pieces; i++){
-    const t = frames[last].board[i];
-    mat[t.pos] = i;
-  }
+  for(let i = 0; i < pieces; i++) mat[last_board[i]] = i;
   return mat;
 }
 
@@ -75,38 +70,6 @@ function start(){
   recover_pos = calc_recover_pos();
 }
 
-
-
-/*
-//左上から原画像の回転を行う
-function rotate_imgs(str){
-  for(let i = 0; i < height; i++){
-    for(let j = 0; j < width; j++){
-      let img = document.getElementById(i + "_" + j);
-      img.style.transform = "rotate(" + str[i*width+j]*90 + "deg)";
-    }
-  }
-}
-//動き付き
-async function rotate_imgs_motion(str){
-  const deg_time = 7; //1度動かすのにかける時間
-  const next_turn_wait_time = 300; //次動かすまでの時間
-  const num = [1,2,-1];
-  for(let c = 0; c < 3; c++){
-    for(let r = 0; r <= 90; r++){
-      for(let i = 0; i < height; i++){
-        for(let j = 0; j < width; j++){
-          if(str[i*width+j] != c+1) continue;
-          let img = document.getElementById(i + "_" + j);
-          img.style.transform = "rotate(" + r*num[c] + "deg)";
-        }
-      }
-      await sleep(deg_time);
-    }
-    await sleep(next_turn_wait_time);
-  }
-}
-*/
 
 //画像の要素を生成
 function create_image_element(id, img_num){
@@ -124,7 +87,7 @@ function create_image_element(id, img_num){
   return img;
 }
 //画像の座標などを初期状態に戻す
-function init_img_elem(id){
+function init_image_element(id){
   const y = Math.floor(id / width);
   const x = id % width;
   const img = document.getElementById(id);
@@ -141,19 +104,22 @@ async function swap_motion(cur, next, time, board){
   const sx = cur % width;
   const ty = Math.floor(next / width);
   const tx = next % width;
+  const ssy = sy * size, ssx = sx * size;
+  const sty = ty * size, stx = tx * size;
   let s = document.getElementById(cur);
   let t = document.getElementById(next);
   for(let r = 0; r < 4; r++){
     if(cur + d[r] == next){
       for(let i = 0; i <= size; i += delay){
-        s.style.top = sy*size + i*dy[r] + "px";
-        s.style.left = sx*size + i*dx[r] + "px";
-        t.style.top = ty*size + i*dy[(r + 2) % 4] + "px";
-        t.style.left = tx*size + i*dx[(r + 2) % 4] + "px";
+        s.style.top = ssy + i*dy[r] + "px";
+        s.style.left = ssx + i*dx[r] + "px";
+        t.style.top = sty + i*dy[(r + 2) % 4] + "px";
+        t.style.left = stx + i*dx[(r + 2) % 4] + "px";
+        if(!is_moving) break;
         await sleep(1);
       }
-      init_img_elem(cur);
-      init_img_elem(next);
+      init_image_element(cur);
+      init_image_element(next);
       return;
     }
   }
@@ -162,11 +128,8 @@ async function swap_motion(cur, next, time, board){
     const ny = (sy + dy[r] + height) % height;
     const nx = (sx + dx[r] + width) % width;
     if(ny != ty || nx != tx) continue;
-    //分割してそれぞれ表示する
-
     //座標nextに画像board[cur]を追加する
     let s_temp = create_image_element(next, board[cur]);
-    //座標curに画像board[next]を追加する
     let t_temp = create_image_element(cur, board[next]);
     canvas.appendChild(s_temp);
     canvas.appendChild(t_temp);
@@ -187,10 +150,10 @@ async function swap_motion(cur, next, time, board){
         s.style.height = size-i + "px";
         t.style.height = size-i + "px";
       }
-      if(r == 0) t.style.top = ty*size + i + "px"; 
-      if(r == 1) t.style.left = tx*size + i + "px";
-      if(r == 2) s.style.top = sy*size + i + "px";
-      if(r == 3) s.style.left = sx*size + i + "px";
+      if(r == 0) t.style.top = sty + i + "px"; 
+      if(r == 1) t.style.left = stx + i + "px";
+      if(r == 2) s.style.top = ssy + i + "px";
+      if(r == 3) s.style.left = ssx + i + "px";
       //反対側に生成された画像の移動
       if(r & 1){
         s_temp.style.width = i + "px";
@@ -199,14 +162,15 @@ async function swap_motion(cur, next, time, board){
         s_temp.style.height = i + "px";
         t_temp.style.height = i + "px";
       }
-      if(r == 0) s_temp.style.top = ty*size + size - i + "px";
-      if(r == 1) s_temp.style.left = tx*size + size - i + "px";
-      if(r == 2) t_temp.style.top = sy*size + size - i + "px";
-      if(r == 3) t_temp.style.left = sx*size + size - i + "px";
+      if(r == 0) s_temp.style.top = sty + size - i + "px";
+      if(r == 1) s_temp.style.left = stx + size - i + "px";
+      if(r == 2) t_temp.style.top = ssy + size - i + "px";
+      if(r == 3) t_temp.style.left = ssx + size - i + "px";
+      if(!is_moving) break;
       await sleep(1);
     }
-    init_img_elem(cur);
-    init_img_elem(next);
+    init_image_element(cur);
+    init_image_element(next);
     canvas.removeChild(s_temp);
     canvas.removeChild(t_temp);
     return;
